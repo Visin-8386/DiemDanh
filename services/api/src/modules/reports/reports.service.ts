@@ -29,9 +29,13 @@ export class ReportsService {
       this.prisma.leaveRequest.count({ where: { status: 'PENDING' } }),
     ]);
 
-    const presentToday = todayAttendance.filter((a) => ['PRESENT', 'LATE'].includes(a.status)).length;
-    const lateToday = todayAttendance.filter((a) => a.status === 'LATE').length;
-    const absentToday = totalEmployees - todayAttendance.length;
+    // Filter to only active employees for accurate dashboard stats
+    const activeTodayAttendance = todayAttendance.filter((a) => a.employee?.status === 'ACTIVE');
+
+    const presentToday = activeTodayAttendance.filter((a) => ['PRESENT', 'LATE'].includes(a.status)).length;
+    const lateToday = activeTodayAttendance.filter((a) => a.status === 'LATE').length;
+    const leaveToday = activeTodayAttendance.filter((a) => a.status === 'LEAVE').length;
+    const absentToday = Math.max(0, totalEmployees - presentToday - leaveToday);
     const attendanceRate = totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0;
 
     // Last 7 days chart data
@@ -41,8 +45,10 @@ export class ReportsService {
       const dayStart = date.startOf('day').toDate();
       const dayRecords = await this.prisma.attendance.findMany({
         where: { date: dayStart },
+        include: { employee: true },
       });
-      const present = dayRecords.filter((a) => ['PRESENT', 'LATE'].includes(a.status)).length;
+      const activeDayRecords = dayRecords.filter((a) => a.employee?.status === 'ACTIVE');
+      const present = activeDayRecords.filter((a) => ['PRESENT', 'LATE'].includes(a.status)).length;
       last7Days.push({
         date: date.format('DD/MM'),
         present,
@@ -58,13 +64,13 @@ export class ReportsService {
       absentToday,
       attendanceRate,
       pendingLeave,
-      recentCheckins: todayAttendance.slice(0, 10),
+      recentCheckins: activeTodayAttendance.slice(0, 10),
       last7Days,
       todayDistribution: {
-        present: presentToday - lateToday,
+        present: Math.max(0, presentToday - lateToday),
         late: lateToday,
         absent: absentToday,
-        leave: todayAttendance.filter((a) => a.status === 'LEAVE').length,
+        leave: leaveToday,
       },
     };
   }
