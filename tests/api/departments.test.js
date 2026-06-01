@@ -48,14 +48,14 @@ describe('🏢 Departments API Tests', () => {
 
     test('✅ Tất cả code phòng ban là unique', async () => {
       const res = await adminApi.get('/departments');
-      const codes = res.data.map((d: any) => d.code);
+      const codes = res.data.map((d) => d.code);
       const uniqueCodes = [...new Set(codes)];
       expect(codes.length).toBe(uniqueCodes.length);
     });
 
     test('✅ Departments IT, HR, MKT tồn tại', async () => {
       const res = await adminApi.get('/departments');
-      const codes = res.data.map((d: any) => d.code);
+      const codes = res.data.map((d) => d.code);
       expect(codes).toContain('IT');
       expect(codes).toContain('HR');
       expect(codes).toContain('MKT');
@@ -63,7 +63,7 @@ describe('🏢 Departments API Tests', () => {
 
     test('✅ Có đủ 8 phòng ban từ seed (ACC, SALE, OPS, RD, LEG)', async () => {
       const res = await adminApi.get('/departments');
-      const codes = res.data.map((d: any) => d.code);
+      const codes = res.data.map((d) => d.code);
       const expected = ['IT', 'HR', 'MKT', 'ACC', 'SALE', 'OPS', 'RD', 'LEG'];
       expected.forEach(code => {
         expect(codes).toContain(code);

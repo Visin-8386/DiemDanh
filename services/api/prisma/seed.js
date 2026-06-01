@@ -74,16 +74,15 @@ async function main() {
   const empIds = {};
   for (const e of specials) {
     const emp = await prisma.employee.upsert({
-      where: { code: e.code }, update: {},
+      where: { code: e.code },
+      // Luôn cập nhật email + password để test credentials không bị stale
+      update: { email: e.email, passwordHash: hash(e.pw), role: e.role },
       create: {
         code: e.code, fullName: e.fullName, email: e.email, role: e.role,
         position: e.position, departmentId: depts[e.dept], shiftId: shifts['HC'],
         hireDate: new Date(e.hire), passwordHash: hash(e.pw), annualLeaveLeft: 12,
         isFaceRegistered: e.role !== 'SUPER_ADMIN',
       },
-    }).catch(async () => {
-      // Email conflict: tìm theo email hoặc tạo mới với email khác
-      return prisma.employee.findUnique({ where: { code: e.code } });
     });
     empIds[e.code] = emp.id;
   }
