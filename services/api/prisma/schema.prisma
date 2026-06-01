@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  HR_MANAGER
+  DEPARTMENT_HEAD
+  EMPLOYEE
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  EARLY_LEAVE
+  LATE_AND_EARLY
+  ABSENT
+  LEAVE
+  HOLIDAY
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  UNPAID
+  BUSINESS
+  MATERNITY
+  OTHER
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Department {
+  id          String       @id @default(cuid())
+  name        String
+  code        String       @unique
+  description String?
+  parentId    String?
+  parent      Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
+  children    Department[] @relation("DeptHierarchy")
+  employees   Employee[]
+  managerId   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Shift {
+  id                String     @id @default(cuid())
+  name              String
+  code              String     @unique
+  startTime         String
+  endTime           String
+  lateThresholdMins Int        @default(15)
+  earlyLeaveMins    Int        @default(15)
+  workDays          Int[]
+  employees         Employee[]
+  isDefault         Boolean    @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Employee {
+  id               String          @id @default(cuid())
+  code             String          @unique
+  fullName         String
+  email            String          @unique
+  phone            String?
+  avatar           String?
+  position         String
+  departmentId     String
+  department       Department      @relation(fields: [departmentId], references: [id])
+  shiftId          String?
+  shift            Shift?          @relation(fields: [shiftId], references: [id])
+  role             Role            @default(EMPLOYEE)
+  status           EmployeeStatus  @default(ACTIVE)
+  hireDate         DateTime
+  passwordHash     String
+  isFaceRegistered Boolean         @default(false)
+  annualLeaveLeft  Float           @default(12.0)
+  attendances      Attendance[]
+  leaveRequests    LeaveRequest[]
+  approvedLeaves   LeaveRequest[]  @relation("LeaveApprover")
+  auditLogs        AuditLog[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Attendance {
+  id                 String           @id @default(cuid())
+  employeeId         String
+  employee           Employee         @relation(fields: [employeeId], references: [id])
+  date               DateTime         @db.Date
+  checkInTime        DateTime?
+  checkOutTime       DateTime?
+  checkInPhoto       String?
+  checkOutPhoto      String?
+  checkInConfidence  Float?
+  checkOutConfidence Float?
+  status             AttendanceStatus @default(PRESENT)
+  workMinutes        Int?
+  overtimeMinutes    Int              @default(0)
+  lateMinutes        Int              @default(0)
+  earlyLeaveMinutes  Int              @default(0)
+  note               String?
+  isManualEdit       Boolean          @default(false)
+  editedById         String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([employeeId, date])
+}
+
+model LeaveRequest {
+  id           String         @id @default(cuid())
+  employeeId   String
+  employee     Employee       @relation(fields: [employeeId], references: [id])
+  type         LeaveType
+  startDate    DateTime       @db.Date
+  endDate      DateTime       @db.Date
+  totalDays    Float
+  reason       String
+  status       ApprovalStatus @default(PENDING)
+  approvedById String?
+  approvedBy   Employee?      @relation("LeaveApprover", fields: [approvedById], references: [id])
+  approvedAt   DateTime?
+  rejectReason String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      Employee @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}

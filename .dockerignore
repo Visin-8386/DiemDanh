@@ -1,0 +1,11 @@
+services/api/node_modules
+services/web/node_modules
+services/api/.next
+services/web/.next
+services/web/out
+**/__pycache__
+**/*.pyc
+**/*.pyo
+.git
+.gitignore
+*.log

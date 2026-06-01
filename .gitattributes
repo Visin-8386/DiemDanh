@@ -1,0 +1,29 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Force LF for shell scripts (must run on Linux containers)
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Force CRLF for Windows batch files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files — no line ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.onnx binary
+*.pkl binary
+*.pt binary
+*.pth binary

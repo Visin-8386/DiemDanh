@@ -1,0 +1,19 @@
+{
+  "name": "diemdanh-tests",
+  "version": "1.0.0",
+  "description": "Enterprise Testing Suite for DiemDanh Face ID Attendance System",
+  "main": "index.js",
+  "scripts": {
+    "test:api": "jest api/ --runInBand --verbose",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "npm run test:api && npm run test:e2e"
+  },
+  "dependencies": {
+    "axios": "^1.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "jest": "^29.7.0"
+  }
+}
