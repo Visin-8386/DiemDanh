@@ -87,7 +87,7 @@ export default function EmployeesPage() {
                   : <span className="badge-danger">✗ Chưa đăng ký</span>}
               </p>
               <div className="mt-3 flex gap-1.5 justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Link href={`/dashboard/employees/${emp.id}/register-face`}
+                <Link href={`/employees/${emp.id}/register-face`}
                   className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 transition-colors border border-purple-500/20">
                   <Camera className="w-3 h-3" /> Face ID
                 </Link>

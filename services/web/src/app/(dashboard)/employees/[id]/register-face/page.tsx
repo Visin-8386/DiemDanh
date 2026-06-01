@@ -23,7 +23,7 @@ export default function RegisterFacePage() {
     mutationFn: () => faceApi.register(id as string, photos.map((p) => p.blob)),
     onSuccess: (res) => {
       toast.success(`Đăng ký thành công! ${res.data.embeddings_stored} ảnh được xử lý.`);
-      router.push('/dashboard/employees');
+      router.push('/employees');
     },
     onError: (e: any) => toast.error(e.response?.data?.detail || 'Lỗi đăng ký khuôn mặt'),
   });
