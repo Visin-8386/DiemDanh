@@ -39,6 +39,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - NEXT_PUBLIC_API_URL=http://localhost/api
+      - TZ=Asia/Ho_Chi_Minh
     depends_on:
       - api
     networks:
@@ -58,6 +59,7 @@ services:
     env_file:
       - .env
     environment:
+      - TZ=Asia/Ho_Chi_Minh
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
       - JWT_SECRET=${JWT_SECRET}
@@ -102,6 +104,7 @@ services:
     env_file:
       - .env
     environment:
+      - TZ=Asia/Ho_Chi_Minh
       - DATABASE_URL=${DATABASE_URL}
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_PORT=${MINIO_PORT}

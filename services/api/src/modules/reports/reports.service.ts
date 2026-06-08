@@ -78,7 +78,6 @@ export class ReportsService {
   async getMonthlySummary(month: string, departmentId?: string) {
     const start = dayjs(month).startOf('month').toDate();
     const end = dayjs(month).endOf('month').toDate();
-    const workDays = this.getWorkDays(month);
 
     const where: any = { status: 'ACTIVE' };
     if (departmentId) where.departmentId = departmentId;
@@ -87,6 +86,7 @@ export class ReportsService {
       where,
       include: {
         department: true,
+        shift: true,
         attendances: { where: { date: { gte: start, lte: end } } },
       },
     });
@@ -100,36 +100,34 @@ export class ReportsService {
       const totalWorkMinutes = records.reduce((sum, r) => sum + (r.workMinutes || 0), 0);
       const overtimeMinutes = records.reduce((sum, r) => sum + (r.overtimeMinutes || 0), 0);
 
+      // Calculate work days specific to the employee's shift
+      let empWorkDays = 0;
+      let current = dayjs(start);
+      const empWorkDaysArr = emp.shift?.workDays || [1, 2, 3, 4, 5]; // Default to Mon-Fri
+      while (current.isBefore(end) || current.isSame(end, 'day')) {
+        if (empWorkDaysArr.includes(current.day())) empWorkDays++;
+        current = current.add(1, 'day');
+      }
+
       return {
         employeeId: emp.id,
         code: emp.code,
         fullName: emp.fullName,
         department: emp.department?.name,
         position: emp.position,
-        workDays,
+        workDays: empWorkDays,
         present,
         late,
         absent,
         leave,
         totalWorkHours: +(totalWorkMinutes / 60).toFixed(1),
         overtimeHours: +(overtimeMinutes / 60).toFixed(1),
-        attendanceRate: workDays > 0 ? Math.round(((present + late) / workDays) * 100) : 0,
+        attendanceRate: empWorkDays > 0 ? Math.min(100, Math.round(((present + late) / empWorkDays) * 100)) : 0,
       };
     });
   }
 
-  private getWorkDays(month: string): number {
-    const start = dayjs(month).startOf('month');
-    const end = dayjs(month).endOf('month');
-    let count = 0;
-    let current = start;
-    while (current.isBefore(end) || current.isSame(end, 'day')) {
-      const dow = current.day();
-      if (dow !== 0 && dow !== 6) count++;
-      current = current.add(1, 'day');
-    }
-    return count;
-  }
+  // Removed generic getWorkDays as it's now calculated per employee
 
   async exportExcel(month: string, departmentId?: string): Promise<Buffer> {
     const summary = await this.getMonthlySummary(month, departmentId);
