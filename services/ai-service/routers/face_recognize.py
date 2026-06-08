@@ -27,7 +27,7 @@ async def recognize_face(
     if query_embedding is None:
         raise HTTPException(422, detail={
             "code": "NO_FACE_DETECTED",
-            "message": "No face detected in the image. Please ensure your face is clearly visible and well-lit."
+            "message": "Không nhận diện được khuôn mặt. Vui lòng đảm bảo khuôn mặt của bạn rõ ràng và đủ sáng."
         })
     
     # 2. Load all employee embeddings from DB
@@ -36,7 +36,7 @@ async def recognize_face(
     if len(all_records) == 0:
         raise HTTPException(404, detail={
             "code": "NO_EMPLOYEES_REGISTERED",
-            "message": "No employees have registered their face yet."
+            "message": "Hệ thống chưa có dữ liệu khuôn mặt nhân viên nào. Vui lòng đăng ký trước khi điểm danh."
         })
     
     employee_data = [
@@ -61,7 +61,7 @@ async def recognize_face(
             "recognized": False,
             "employee_id": None,
             "confidence": None,
-            "message": "Face not recognized. Please register or try again with better lighting."
+            "message": "Khuôn mặt lạ hoặc chưa được đăng ký. Vui lòng thử lại với ánh sáng tốt hơn."
         }
     
     logger.info(f"Recognized: employee {match['employee_code']} with confidence {match['confidence']}")

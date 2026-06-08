@@ -17,7 +17,8 @@ export class AttendanceService {
     try {
       faceResult = await this.faceService.recognizeFace(file);
     } catch (err) {
-      throw new BadRequestException('Lỗi kết nối AI service. Vui lòng thử lại.');
+      const msg = err.response?.data?.detail?.message || err.response?.data?.detail || 'Lỗi kết nối AI service. Vui lòng thử lại.';
+      throw new BadRequestException(msg);
     }
 
     if (!faceResult.recognized) {
@@ -92,8 +93,9 @@ export class AttendanceService {
     let faceResult: any;
     try {
       faceResult = await this.faceService.recognizeFace(file);
-    } catch {
-      throw new BadRequestException('Lỗi kết nối AI service.');
+    } catch (err) {
+      const msg = err.response?.data?.detail?.message || err.response?.data?.detail || 'Lỗi kết nối AI service. Vui lòng thử lại.';
+      throw new BadRequestException(msg);
     }
     if (!faceResult.recognized) {
       throw new BadRequestException('Không nhận diện được khuôn mặt.');
